@@ -3,6 +3,7 @@ import base64
 import json
 import os
 import errno
+from itertools import zip_longest
 
 import click
 import cv2
@@ -25,6 +26,11 @@ D2_ROOT = os.path.join(
 )  # Root of detectron2
 MIN_BOXES = 36
 MAX_BOXES = 36
+
+
+def grouper(iterable, n, fillvalue=None):
+    args = [iter(iterable)] * n
+    return zip_longest(*args, fillvalue=fillvalue)
 
 
 def fast_rcnn_inference_single_image(
@@ -181,7 +187,14 @@ def load_vg_classes():
 def dump_features_to_tsv(out_dir, dataset_name, detector, pathXid, cuda=True):
     img_paths, img_ids = zip(*pathXid)
     imgs = [cv2.imread(img_path) for img_path in img_paths]
-    instances_list, features_list = doit(detector, imgs, cuda)
+
+    features_list = list()
+    instances_list = list()
+    for img_batch in grouper(imgs, 8):
+        img_batch = [i for i in img_batch if i is not None]
+        instances_batch, features_batch = doit(detector, img_batch, cuda)
+        features_list += features_batch
+        instances_list += instances_batch
 
     class_names = load_vg_classes()
 
@@ -340,7 +353,6 @@ def build_model(cuda=False):
     cfg.MODEL.WEIGHTS = (
         "http://nlp.cs.unc.edu/models/faster_rcnn_from_caffe.pkl"
     )
-    cfg.SOLVER.IMS_PER_BATCH = 4
 
     if not cuda:
         cfg.DEVICE = "cpu"
