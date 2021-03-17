@@ -27,7 +27,7 @@ MIN_BOXES = 36
 MAX_BOXES = 36
 
 def fast_rcnn_inference_single_image(
-        boxes, scores, image_shape, score_thresh, nms_thresh, topk_per_image
+        boxes, scores, image_shape, score_thresh, nms_thresh, topk_per_image, cuda=True
 ):
     scores = scores[:, :-1]
     num_bbox_reg_classes = boxes.shape[1] // 4
@@ -40,7 +40,12 @@ def fast_rcnn_inference_single_image(
     max_scores, max_classes = scores.max(1)       # R x C --> R
     num_objs = boxes.size(0)
     boxes = boxes.view(-1, 4)
-    idxs = torch.arange(num_objs) * num_bbox_reg_classes + max_classes
+    if cuda:
+        torcharange = torch.arange(num_objs).cuda()
+    else:
+        torcharange = torch.arange(num_objs)
+
+    idxs = torcharange * num_bbox_reg_classes + max_classes
     max_boxes = boxes[idxs]     # Select max boxes according to the max scores.
 
     # Apply NMS
@@ -57,7 +62,7 @@ def fast_rcnn_inference_single_image(
     return result, keep
 
 
-def doit(detector, raw_images):
+def doit(detector, raw_images, cuda=True):
     with torch.no_grad():
         # Preprocessing
         inputs = []
@@ -99,7 +104,7 @@ def doit(detector, raw_images):
             for nms_thresh in np.arange(0.3, 1.0, 0.1):
                 instances, ids = fast_rcnn_inference_single_image(
                     boxes, probs, image_size,
-                    score_thresh=0.2, nms_thresh=nms_thresh, topk_per_image=MAX_BOXES
+                    score_thresh=0.2, nms_thresh=nms_thresh, topk_per_image=MAX_BOXES, cuda=cuda
                 )
                 if len(ids) >= MIN_BOXES:
                     break
@@ -142,10 +147,10 @@ def load_vg_classes():
     return class_names
 
 
-def dump_features_to_tsv(out_dir, dataset_name, detector, pathXid):
+def dump_features_to_tsv(out_dir, dataset_name, detector, pathXid, cuda=True):
     img_paths, img_ids = zip(*pathXid)
     imgs = [cv2.imread(img_path) for img_path in img_paths]
-    instances_list, features_list = doit(detector, imgs)
+    instances_list, features_list = doit(detector, imgs, cuda)
 
     class_names = load_vg_classes()
 
@@ -277,7 +282,7 @@ def build_model(cuda=False):
 def main(image_dir, dataset_name, output_dir, cuda):
     paths_and_ids = load_image_ids(image_dir)     # Get paths and ids
     detector = build_model(cuda)
-    dump_features_to_tsv(output_dir, dataset_name, detector, paths_and_ids)
+    dump_features_to_tsv(output_dir, dataset_name, detector, paths_and_ids, cuda)
 
 
 if __name__ == "__main__":
