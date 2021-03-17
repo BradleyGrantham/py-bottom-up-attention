@@ -162,9 +162,9 @@ def dump_features_to_tsv(out_dir, dataset_name, detector, pathXid, cuda=True):
     for i, (img, image_id, instances, features) in enumerate(zip(imgs, img_ids, instances_list, features_list)):
 
         d = dict()
-        boxes = instances.pred_boxes.tensor.numpy()
-        preds = instances.scores.numpy()
-        clses = instances.pred_classes.numpy()
+        boxes = instances.pred_boxes.tensor.to("cpu").numpy()
+        preds = instances.scores.to("cpu").numpy()
+        clses = instances.pred_classes.to("cpu").numpy()
         num_bboxes = boxes.shape[0]
         boxes_with_height_and_width = np.concatenate(
             (
