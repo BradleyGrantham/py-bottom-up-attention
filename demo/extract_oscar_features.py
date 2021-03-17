@@ -134,7 +134,7 @@ def doit(detector, raw_images, cuda=True):
 
 def load_vg_classes():
     # Load VG Classes
-    data_path = 'data/genome/1600-400-20'
+    data_path = os.path.join(PACKAGE_LOCATION, 'demo/data/genome/1600-400-20')
 
     vg_classes = []
     with open(os.path.join(data_path, 'objects_vocab.txt')) as f:
