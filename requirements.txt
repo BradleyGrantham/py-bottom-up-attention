@@ -5,3 +5,4 @@ numpy
 cython
 opencv-python
 click
+pandas
