@@ -204,7 +204,7 @@ def dump_features_to_tsv(out_dir, dataset_name, detector, pathXid, cuda=True):
     fake_images = list()
 
     for i, (img, image_id, instances, features) in enumerate(
-        zip(imgs, img_ids, instances_list, features_list)
+        zip(imgs, img_ids, instances_list[:len(imgs)], features_list[:len(imgs)])
     ):
 
         d = dict()
