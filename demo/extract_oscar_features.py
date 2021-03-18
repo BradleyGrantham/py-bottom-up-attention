@@ -254,7 +254,7 @@ def dump_features_to_tsv(out_dir, dataset_name, detector, pathXid, cuda=True):
                 "caption": "A photo that has no caption.",
             }
         )
-        fake_images.append({"id": image_id, "file_name": image_id})
+        fake_images.append({"id": i, "file_name": image_id})
 
     feature_filename = f"{dataset_name}.feature.tsv"
     label_filename = f"{dataset_name}.label.tsv"
