@@ -191,8 +191,8 @@ def dump_features_to_tsv(out_dir, dataset_name, detector, pathXid, cuda=True):
     features_list = list()
     instances_list = list()
     for img_batch in grouper(imgs, 8):
-        img_batch = [i for i in img_batch if i is not None]
-        instances_batch, features_batch = doit(detector, img_batch, cuda)
+        batch_images = [i for i in img_batch if i is not None]
+        instances_batch, features_batch = doit(detector, batch_images, cuda)
         features_list += features_batch
         instances_list += instances_batch
 
