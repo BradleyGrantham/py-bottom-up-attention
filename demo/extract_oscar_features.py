@@ -191,7 +191,7 @@ def dump_features_to_tsv(out_dir, dataset_name, detector, pathXid, cuda=True):
     features_list = list()
     instances_list = list()
     for img_batch in grouper(imgs, 8):
-        batch_images = [i for i in img_batch if i is not None]
+        batch_images = [j for j in img_batch if j is not None]
         instances_batch, features_batch = doit(detector, batch_images, cuda)
         features_list += features_batch
         instances_list += instances_batch
@@ -203,9 +203,7 @@ def dump_features_to_tsv(out_dir, dataset_name, detector, pathXid, cuda=True):
     fake_captions = list()
     fake_images = list()
 
-    for i, (img, image_id, instances, features) in enumerate(
-        zip(imgs, img_ids, instances_list[:len(imgs)], features_list[:len(imgs)])
-    ):
+    for img, image_id, instances, features in zip(imgs, img_ids, instances_list, features_list):
 
         d = dict()
         boxes = instances.pred_boxes.tensor.to("cpu").numpy()
