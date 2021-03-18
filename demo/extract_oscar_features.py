@@ -250,7 +250,7 @@ def dump_features_to_tsv(out_dir, dataset_name, detector, pathXid, cuda=True):
         fake_captions.append(
             {
                 "image_id": image_id,
-                "id": i,
+                "id": image_id,
                 "caption": "A photo that has no caption.",
             }
         )
